@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<title>{% block title %} csApp{% endblock %}</title>
+
+
+<style>
+body {
+ font-family: "Lato", sans-serif;
+ /*  font-family: Arial, Helvetica, sans-serif; */
+}
+
+/* Fixed sidenav, full height */
+.sidenav {
+  height: 100%;
+  width: 300px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #333;
+  overflow-x: hidden; 
+  padding-top: 20px;
+}
+
+/* Style the sidenav links and the dropdown button */
+.sidenav a, .dropdown-btn {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 20px;
+  color: white;
+  display: block;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+.btn {
+  background-color: DodgerBlue;
+  border: none;
+  color: white;
+  padding: 2px 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Darker background on mouse-over */
+.btn:hover {
+  background-color: red;
+}
+/* On mouse-over */
+.sidenav a:hover, .dropdown-btn:hover {
+ /* color: #f1f1f1; */
+ 
+  background-color: red;
+}
+
+/* Main content */
+.main {
+  margin-left: 300px; /* Same as the width of the sidenav */
+  font-size: 20px; /* Increased text to enable scrolling */
+  padding: 12px 10px;
+}
+
+#mycanvas{border:2px solid red;}
+   
+/* Add an active class to the active dropdown button */
+.active {
+  background-color: green;
+  color: white;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  font-size: 18px;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  font-size: 18px;
+  opacity: 1;
+}
+
+/* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
+.dropdown-container {
+  display: none;
+  background-color: #262626;
+  padding-left: 8px;
+}
+
+/* Optional: Style the caret down icon */
+.fa-caret-down {
+  float: right;
+  padding-right: 8px;
+}
+
+/* Some media queries for responsiveness */
+@media screen and (max-height: 550px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+table {
+    font-family: arial, sans-serif
+    border-collapse: collapse;
+    width: 100%;
+    display: block;
+   /* table-layout: fixed; */
+   /* overflow:auto; */
+    white-space: nowrap;
+}
+td,th 
+{
+  border: 1px solid #dddddd;
+  text-align: left;
+    font-size: 16px;
+     overflow:auto;
+  padding: 8px;
+}
+
+input.larger 
+{
+    transform: scale(2);
+    margin: 0px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+</style>
+</head>
+<body>
+
+<div class="sidenav">
+ 
+  <button class="dropdown-btn">User Accounts
+    <i class="fa fa-caret-down"></i>
+  </button>  
+  <div class="dropdown-container">
+    <a href="/regist">Register </a>
+    <a href="/user_login">Login </a>
+    <a href="/logout">Logout</a>
+  </div>
+ 
+    <button class="dropdown-btn">Admin Operations
+    <i class="fa fa-caret-down"></i>
+  </button>  
+  <div class="dropdown-container">
+    <a href="/getAdminStatus">Get Admin Status</a>  
+    <a href="/updateServer">Update Server</a>
+    <a href="/verifySeller">Verify Seller</a>
+    <a href="/acceptBid">Accept Bid</a>
+  </div>
+    <button class="dropdown-btn">Sell & Buy Operations
+        <i class="fa fa-caret-down"></i>
+    </button>  
+    <div class="dropdown-container">
+        <a href="/buyerRegist" title="Register a buyer account">Buyer Register</a>
+        <a href="/sellerRegist" title="Register a seller account">Seller Register</a>
+        <a href="/putCompetition" title="Advertise a competition">Put Competition</a>
+        <a href="/putBid" title="Put forward a bid">Put Bid</a>
+        <a href="/searchCompetition" title="Search registered competitions with successful bids">Search Competition</a>
+        <a href="/allCompetitions" title="List all competitions">All competitions</a>
+    </div>
+     <hr>
+</div>
+
+<div class="main">
+<!--  Main class division ================================== -->
+    
+    <img src="static/ml2.jpeg" width="42px" height="42px"> 
+    <font color=blue size="18px">  <b>csApp: Cloud-based Contest-selling Platform</b> </font>
+  
+    <hr color=blue>  
+    <font color=red> <h3>{{info.msg}}</h3></font>
+  
+    <div class="login-container">
+        {%if info.topic=='user_login'%}
+            <form action="/user_login" method="POST" id="login" >
+                <input type="text" placeholder="User Name" name="username" style="width: 140px;" >
+                <input type="password" placeholder="Password" name="password" style="width: 180px;" >
+                <input type="submit" name="button" value="Login" style="font-size : 18px;color:blue" >           
+            </form>
+        {%endif%}
+    </div>
+    
+    {%if info.topic=='updateServer'%}
+        <form action="/updateServer" method="POST" >
+           Enter Admin Password:&nbsp;&nbsp; 
+           <input type="password" name="passwd" style="font-size : 18px;color:blue; width: 360px;">
+           <p><b>
+            <input type="submit" name="button" value="Apply" 
+                 style="font-size : 18px;color:blue" >   
+            <input type="submit" name="button" value="Cancel" 
+                 style="font-size : 18px;color:blue" > 
+           </b></p>
+        </form>
+    
+    {%endif%}
+    
+    {%if info.topic=='getAdminStatus'%}
+        <form action="/getAdminStatus" method="POST" >
+           Enter Admin Password:&nbsp;&nbsp; 
+           <input type="password" name="passwd" style="font-size : 18px;color:blue; width: 360px;">
+           <p><b>
+            <input type="submit" name="button" value="Apply" 
+                 style="font-size : 18px;color:blue" >   
+            <input type="submit" name="button" value="Cancel" 
+                 style="font-size : 18px;color:blue" > 
+           </b></p>
+        </form>
+    
+    {%endif%}
+    
+    {%if info.topic=='acceptBid'%}
+         <form action="/acceptBid" method="POST">
+            <b>
+               Bid Id:&nbsp;&nbsp; 
+                <input type="number" step="1" name="sid" 
+                style="font-size : 18px;color:blue; width: 80px;" value="{{info.sid}}">
+              
+                    <input type="submit" name="button" value="Accept" style="font-size : 
+                       18px;color:blue" >
+                   <input type="submit" name="button" value="Cancel" 
+                        style="font-size : 18px;color:blue" >     
+            </b>
+            <table>
+                {%for row in info.bids%}
+                    <tr>
+                        {% for cell in row %}
+                            <th>{{cell}}</th>
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>  
+            
+        </form>
+        
+    {%endif%}
+    
+    {%if info.topic=='searchCompetition'%}
+         <form action="/searchCompetition" method="POST">
+            <table>
+                {%for row in info.compInfo%}
+                    <tr>
+                        {% for cell in row %}
+                            <th>{{cell}}</th>
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>  
+            
+        </form>
+        
+    {%endif%}
+    
+    {%if info.topic=='allCompetitions'%}
+         <form action="/allCompetitions" method="POST">
+            <table>
+                {%for row in info.compInfo%}
+                    <tr>
+                        {% for cell in row %}
+                            <th>{{cell}}</th>
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>  
+            
+        </form>
+        
+    {%endif%}
+    
+     {%if info.topic=='buyerRegist'%}
+         <form action="/buyerRegist" method="POST">
+            <b>
+               Account Name:&nbsp;&nbsp; 
+                <input type="text"  name="acName" value="{{info.acName}}" 
+                style="font-size : 18px;color:blue;width: 260px; ">
+                <p>
+                    <input type="submit" name="button" value="Register" style="font-size : 
+                       18px;color:blue" >
+                   <input type="submit" name="button" value="Cancel" 
+                        style="font-size : 18px;color:blue" >     
+                </p>
+            </b>
+        </form>
+    {%endif%}
+
+    {%if info.topic=='putCompetition'%}
+         <form action="/putCompetition" method="POST">
+            <b>
+            <p>
+               Account Name:&nbsp;&nbsp; 
+                <input type="text"  name="acName" value="{{info.acName}}" 
+                style="font-size : 18px;color:blue;width: 260px; ">
+            </p>    
+            <p>
+               Open Time:&nbsp;&nbsp; 
+                <input type="text"  name="openTime" value="{{info.openTime}}" 
+                style="font-size : 18px;color:blue;width: 260px; ">
+            </p>     
+            <p>
+               Close Time:&nbsp;&nbsp; 
+                <input type="text"  name="closeTime" value="{{info.closeTime}}" 
+                style="font-size : 18px;color:blue;width: 260px; ">
+            </p>     
+            
+            <p>
+               Minimum capacity:&nbsp;&nbsp; 
+                <input type="text"  name="minimum_capacity" value="{{info.minimum_capacity}}" 
+                style="font-size : 18px;color:blue;width: 260px; ">
+                
+               Currency Type:&nbsp;&nbsp; 
+                <input type="text"  name="currency" value="{{info.currency}}" 
+                style="font-size : 18px;color:blue;width: 120px; "> 
+            </p>     
+                
+                <p>
+                    <input type="submit" name="button" value="Apply" style="font-size : 
+                       18px;color:blue" >
+                   <input type="submit" name="button" value="Cancel" 
+                        style="font-size : 18px;color:blue" >     
+                </p>
+            </b>
+        </form>
+    {%endif%}
+
+    {%if info.topic=='putBid'%}
+         <form action="/putBid" method="POST">
+            <b>
+            <p>
+               Account Name:&nbsp;&nbsp; 
+                <input type="text"  name="acName" value="{{info.acName}}" 
+                style="font-size : 18px;color:blue;width: 260px; ">
+            </p>    
+            <p>
+               competition:&nbsp;&nbsp; 
+                <input type="text"  name="competition" value="{{info.competition}}" 
+                style="font-size : 18px;color:blue;width: 260px; ">
+            </p>     
+            <p>
+               Value:&nbsp;&nbsp; 
+                <input type="text"  name="value" value="{{info.value}}" 
+                style="font-size : 18px;color:blue;width: 260px; ">
+            </p>     
+            
+            <p>
+              
+               Offered capacity:&nbsp;&nbsp; 
+                <input type="text"  name="offered_capacity" value="{{info.offered_capacity}}" 
+                style="font-size : 18px;color:blue;width: 120px; "> 
+            </p>     
+                
+                <p>
+                    <input type="submit" name="button" value="Apply" style="font-size : 
+                       18px;color:blue" >
+                   <input type="submit" name="button" value="Cancel" 
+                        style="font-size : 18px;color:blue" >     
+                </p>
+            </b>
+        </form>
+    {%endif%}
+
+    {%if info.topic=='sellerRegist'%}
+         <form action="/sellerRegist" method="POST">
+            <b>
+               Account Name:&nbsp;&nbsp; 
+                <input type="text"  name="acName" value="{{info.acName}}" 
+                style="font-size : 18px;color:blue;width: 260px; ">
+                <p>
+                    <input type="submit" name="button" value="Register" style="font-size : 
+                       18px;color:blue" >
+                   <input type="submit" name="button" value="Cancel" 
+                        style="font-size : 18px;color:blue" >     
+                </p>
+            </b>
+        </form>
+    {%endif%}
+    
+    {%if info.topic=='regist'%}
+         <form action="/regist" method="POST" id="regist" >
+            <b>
+                <input type="text" placeholder="userName" name="username" style="font-size : 18px;color:blue" required >
+                <input type="text" placeholder="email" name="email" style="font-size : 18px;color:blue" >
+                <input type="text" placeholder="phone" name="phone" style="font-size : 18px;color:blue" >
+                <input type="text" placeholder="mobile" name="mobile" style="font-size : 18px;color:blue" >
+                <input type="password" placeholder="password" name="password" style="font-size : 18px;color:blue" required >
+                <input type="password" placeholder="repeat password" name="password2" style="font-size : 18px;color:blue" required >
+                <p>
+                    <input type="submit" name="button" value="Register" style="font-size : 18px;color:blue" >
+                </p>
+            </b>
+        </form>
+    {%endif%}
+
+    {%if info.topic=='setPredict'%}
+         <form action="/setPredict" method="POST"  enctype="multipart/form-data" >
+            <p><b>
+                Model ID:&nbsp;&nbsp;&nbsp; <input type="number" step="1" name="mdlID" style="width: 80px;" 
+                value="{{info.mdlID}}"> 
+                <input type="submit" name="button" value="Get data" style="font-size : 18px;color:blue" >
+                <input type="submit" name="button" value="Cancel" style="font-size : 18px;color:blue" >
+            </b></p>   
+             <h3>Put input data in the text box, data in each line separated by comma, first line is header line</h3>
+            
+           <textarea name="predict" spellcheck="false" cols="90" rows="12" 
+            style="font-size : 16px;">{{info.predict}}</textarea> 
+            
+            <table id="mdlModels">
+                {%for row in info.model_list%}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{cell}}</td>
+                             
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>
+        </form>
+    {%endif%}
+
+    {%if info.topic=='testReport'%}
+         <form action="/testReport" method="POST"  enctype="multipart/form-data" >
+            <p><b>
+                Model ID:&nbsp;&nbsp;&nbsp; <input type="number" step="1" name="mdlID" style="width: 80px;" 
+                value="{{info.mdlID}}"> 
+                <input type="submit" name="button" value="Get report" style="font-size : 18px;color:blue" >
+                <input type="submit" name="button" value="Cancel" style="font-size : 18px;color:blue" >
+            </b></p>   
+             <h3>Test report for model training</h3>
+            
+           <textarea name="report" spellcheck="false" cols="90" rows="12" 
+            style="font-size : 16px;">{{info.report}}</textarea> 
+            
+            <table id="mdlModels">
+                {%for row in info.model_list%}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{cell}}</td>
+                             
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>
+        </form>
+    {%endif%}
+
+    {%if info.topic=='load_data'%}
+         <form action="/load_data" method="POST"  enctype="multipart/form-data" >
+            <p><b>
+                Model ID:&nbsp;&nbsp;&nbsp; <input type="number" step="1" name="mdlID" style="width: 80px;" 
+                value="{{info.mdlID}}"> 
+            <input type="file"  name="samplefile" value="samplefile" 
+              title="For multiple files, use tar or zip utilities to pack the files" style="border: 1px solid black; padding: 5px;" > 
+            </b></p> 
+            <p><b>
+                Get from url:  &nbsp;&nbsp; <input type="text" name="url" style="width: 680px;" 
+                title="URL address for the data file to be obtained"  value="{{info.url}}">
+            </b></p> 
+            <p><b>
+                <input type="submit" name="button" value="Load file" style="font-size : 18px;color:blue" >
+                <input type="submit" name="button" value="Get from url" style="font-size : 18px;color:blue" >
+                <input type="submit" name="button" value="Cancel" style="font-size : 18px;color:blue" >
+            </b></p>     
+            <table id="mdlModels">
+                {%for row in info.model_list%}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{cell}}</td>
+                             
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>
+        </form>
+    {%endif%}
+    
+    {%if info.topic=='getModel'%}
+         <form action="/getModel" method="POST"  enctype="multipart/form-data" >
+            <p><b>
+                Model ID:&nbsp;&nbsp;&nbsp; <input type="number" step="1" name="mdlID" style="width: 80px;" 
+                value="{{info.mdlID}}"> 
+                <input type="submit" name="button" value="Download model" style="font-size : 18px;color:blue" >
+                <input type="submit" name="button" value="Cancel" style="font-size : 18px;color:blue" >
+            </b></p>     
+            <table id="mdlModels">
+                {%for row in info.model_list%}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{cell}}</td>
+                             
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>
+        </form>
+    {%endif%}
+    {%if info.topic=='train_model'%}
+         <form action="/train_model" method="POST"  enctype="multipart/form-data" >
+            <p><b>
+                Model ID:&nbsp;&nbsp;&nbsp; <input type="number" step="1" name="mdlID" style="width: 80px;" 
+                value="{{info.mdlID}}"> 
+                <input type="submit" name="button" value="Train model" style="font-size : 18px;color:blue" >
+                <input type="submit" name="button" value="Cancel" style="font-size : 18px;color:blue" >
+            </b></p>     
+            <table id="mdlModels">
+                {%for row in info.model_list%}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{cell}}</td>
+                             
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>
+        </form>
+    {%endif%}
+    
+    {%if info.topic=='predict'%}
+         <form action="/predict" method="POST"  enctype="multipart/form-data" >
+            <p><b>
+                Model ID:&nbsp;&nbsp;&nbsp; <input type="number" step="1" name="mdlID" style="width: 80px;" 
+                value="{{info.mdlID}}"> 
+                <input type="submit" name="button" value="Predict" style="font-size : 18px;color:blue" >
+                <input type="submit" name="button" value="Cancel" style="font-size : 18px;color:blue" >
+            </b></p>     
+            <h3>Prediction result:</h3>
+            <table id="predictRes">
+                {%for row in info.result%}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{cell}}</td>
+                             
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>
+            
+            
+            <table id="mdlModels">
+                {%for row in info.model_list%}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{cell}}</td>
+                             
+                        {%endfor%}
+                    </tr>
+                {%endfor%}
+            </table>
+            
+        </form>
+    {%endif%}
+    
+    
+    {%if info.topic=='set_model'%}
+         <form action="/set_model" method="POST" id="set_model" >
+         <p><b>
+             Model Name:&nbsp;&nbsp;&nbsp; <input type="text" name="model_name" value="{{info.model_name}}" 
+                style="width: 360px;" >
+         </b></p> 
+        
+        <p><b>
+             Description:&nbsp;&nbsp;&nbsp; <input type="text" name="model_desc" value="{{info.model_desc}}" 
+                style="width: 650px;" >
+         </b></p>
+         <p><b>
+            Model type:&nbsp;&nbsp;
+                    <select id="modelType" name="modelType" >
+                        <option value="Support Vector Machine">Support Vector Machine</option>     
+                        <option value="Random Forest">Random Forest</option>
+                        <option value="Multilayer Perceptron">Multilayer Perceptron</option>
+                        <option selected>{{info.modelType}}</option>
+                    </select>
+            </b></p>  
+            
+            <p><b>
+                <input type="submit" name="button" value="Apply" style="font-size : 18px;color:blue" >
+                <input type="submit" name="button" value="Cancel" style="font-size : 18px;color:blue" >
+            </b></p>     
+        </form>
+    {%endif%}
+    
+ 
+<!--  Main class body section ends here  -->
+</div>
+
+<script>
+/* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
+var dropdown = document.getElementsByClassName("dropdown-btn");
+var i;
+
+for (i = 0; i < dropdown.length; i++) 
+{
+    dropdown[i].addEventListener("click", function() 
+    {
+        this.classList.toggle("active");
+        var dropdownContent = this.nextElementSibling;
+        if (dropdownContent.style.display === "block") 
+        {
+            dropdownContent.style.display = "none";
+        } 
+        else 
+        {
+            dropdownContent.style.display = "block";
+        }
+    });
+}
+</script>
+
+
+<script>
+    function showTableData(tab) {
+        document.getElementById('tinfo').innerHTML= "";
+        var myTab = document.getElementById(tab);
+        // LOOP THROUGH EACH ROW OF THE TABLE AFTER HEADER.
+       // myTab.rows.length
+        for (i = 1; i < myTab.rows.length; i++) {
+
+            // GET THE CELLS COLLECTION OF THE CURRENT ROW.
+            var objCells = myTab.rows.item(i).cells;
+
+            // LOOP THROUGH EACH CELL OF THE CURENT ROW TO READ CELL VALUES.
+            for (var j = 0; j < objCells.length; j++) {
+                var ch='';
+                if (j>0)
+                {
+                    ch=',';
+                }
+                tinfo.innerHTML = tinfo.innerHTML + ch + objCells.item(j).innerHTML;
+            }
+            tinfo.innerHTML = tinfo.innerHTML + '\n';     // ADD A BREAK (TAG).
+        }
+    }
+</script>
+
+<!-- End of html file     -->
+
+</body>
+</html> 
+

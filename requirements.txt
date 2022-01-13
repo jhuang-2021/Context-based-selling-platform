@@ -1,0 +1,9 @@
+flask
+pathlib
+flask_sqlalchemy
+sqlalchemy
+scipy
+numpy
+pandas
+matplotlib
+datetime
