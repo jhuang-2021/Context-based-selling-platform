@@ -25,7 +25,7 @@ For a product or a service someone wants to sell or buy to use this platform,
 the process involves a few steps:
 
 1. User Registration: one needs to register on the platform and create a user account
-2. Buyer Registratio: on top of the User Registration, to buy a product or service, 
+2. Buyer Registration: on top of the User Registration, to buy a product or service, 
       you need to register as a buyer
 3. Seller Registration: apart from user registration, if you want to sell 
    a product or service, you need to register as a seller
@@ -35,7 +35,7 @@ the process involves a few steps:
 5. Any user can register as both a seller and a buyer
 6. The sell/buy process starts with a buyer submit a 'competition', which 
    defines his/her needs in a JSON string. 
-   The main elements of a 'competition' itm consist of:
+   The main elements of a 'competition' consist of:
    a) Opening time for the competition 
    b) The close time for the competition
    c) Minimun capacity: this is an abstraction of some kind of requirement,
@@ -91,7 +91,7 @@ needed to run the code. To implement the requirement, do:
 
 pip install -r requirements.txt 
 
-Note: some system name the pipn for Python3 as pip3. In that case, you ned to do:
+Note: some system name the pip for Python3 as pip3. In that case, you ned to do:
 
 pip3 install -r requirements.txt 
 
